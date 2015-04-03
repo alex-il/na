@@ -1,10 +1,7 @@
 package sample.coherence.data;
 
-
 import com.tangosol.io.pof.annotation.Portable;
 import com.tangosol.io.pof.annotation.PortableProperty;
-
-
 
 @Portable
 public class StatusEvent {
@@ -21,7 +18,7 @@ public class StatusEvent {
 
 	@PortableProperty(3)
 	private String parentMessageId;
-	
+
 	@PortableProperty(4)
 	private long beforeDealy;
 
@@ -42,7 +39,7 @@ public class StatusEvent {
 		messageStatus = status;
 		parentMessageId = parentId;
 		ttl = mttl;
-		beforeDealy=mbeforeDealy;
+		beforeDealy = mbeforeDealy;
 	}
 
 	public String getMessageId() {
@@ -78,7 +75,6 @@ public class StatusEvent {
 	}
 
 	public String toString() {
-		return "messageId=" + messageId + " parent=" + parentMessageId
-				+ " status=" + messageStatus + " ttl=" + ttl;
+		return "messageId=" + messageId + ", parent=" + parentMessageId + ", status=" + messageStatus + ", ttl=" + ttl;
 	}
 }

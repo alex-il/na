@@ -13,29 +13,20 @@ import com.oracle.coherence.common.logging.Logger;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.util.AbstractMapListener;
-import com.tangosol.util.Filter;
 import com.tangosol.util.MapEvent;
-import com.tangosol.util.ValueExtractor;
-import com.tangosol.util.extractor.AbstractExtractor;
-import com.tangosol.util.extractor.ReflectionExtractor;
-import com.tangosol.util.filter.EqualsFilter;
-import com.tangosol.util.filter.KeyAssociatedFilter;
 
-public class MyBackingMapListener extends
-	AbstractMultiplexingBackingMapListener {
-	
+public class MyBackingMapListener extends AbstractMultiplexingBackingMapListener {
 
 	private BackingMapManagerContext backingMapManagerContext;
 
 	private NamedCache cache = null;
-	private ExecutorService executer; 
+	private ExecutorService executer;
 	private long sleepTime = 1;
 
 	public MyBackingMapListener(BackingMapManagerContext context, Long sleep) {
 		super(context);
 		this.backingMapManagerContext = context;
-		executer  = Executors.newFixedThreadPool(20);
+		executer = Executors.newFixedThreadPool(20);
 		sleepTime = sleep;
 		Logger.log(LOG_ALWAYS, "BackingMapListener Inititated: Sleeptime=" + sleepTime);
 	}
@@ -73,20 +64,19 @@ public class MyBackingMapListener extends
 		final StatusEventKey key = (StatusEventKey) getKey(mapEvent);
 
 		final int oper = mapEvent.getId();
-		
+
 		final long sleep = this.sleepTime;
-		
+
 		executer.execute(new Runnable() {
-			
+
 			public void run() {
 				try {
-//					System.out.println("BackingMap: Thread:" + Thread.currentThread().getId() + ":" +  MapEvent.getDescription(oper) + " MsgId=" + event.toString() );
-					String clusterMemberName = ManagementFactory
-							.getRuntimeMXBean().getName();
-					NamedCache cache = CacheFactory
-							.getCache(StatusEvent.EVENTS_CACHE);
+					// System.out.println("BackingMap: Thread:" +
+					// Thread.currentThread().getId() + ":" +
+					// MapEvent.getDescription(oper) + " MsgId=" + event.toString() );
+					String clusterMemberName = ManagementFactory.getRuntimeMXBean().getName();
+					NamedCache cache = CacheFactory.getCache(StatusEvent.EVENTS_CACHE);
 					cache.invoke(key, new FailoverProcessor(event.getMessageStatus(), sleep));
-
 
 				} catch (Throwable e) {
 					System.out.println("Error:" + e.getMessage());
@@ -100,13 +90,11 @@ public class MyBackingMapListener extends
 	}
 
 	public Object getKey(MapEvent mapEvent) {
-		return getBackingMapManagerContext().getKeyFromInternalConverter()
-				.convert(mapEvent.getKey());
+		return getBackingMapManagerContext().getKeyFromInternalConverter().convert(mapEvent.getKey());
 	}
 
 	public Object getNewValue(MapEvent mapEvent) {
-		return getBackingMapManagerContext().getValueFromInternalConverter()
-				.convert(mapEvent.getNewValue());
+		return getBackingMapManagerContext().getValueFromInternalConverter().convert(mapEvent.getNewValue());
 	}
 
 	public BackingMapManagerContext getBackingMapManagerContext() {
