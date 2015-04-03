@@ -1,6 +1,7 @@
 package sample.coherence.data;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;

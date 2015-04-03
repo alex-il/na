@@ -2,18 +2,25 @@ package sample.coherence.failover;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-
-import sample.coherence.data.StatusEvent;
-import sample.coherence.data.StatusEventKey;
+import java.util.Map;
 
 import com.oracle.coherence.common.logging.Logger;
+import com.tangosol.net.BackingMapManagerContext;
+import com.tangosol.coherence.transaction.Connection;
+import com.tangosol.coherence.transaction.ConnectionFactory;
+import com.tangosol.coherence.transaction.DefaultConnectionFactory;
+import com.tangosol.coherence.transaction.OptimisticNamedCache;
+import com.tangosol.coherence.transaction.exception.RollbackException;
+import com.tangosol.coherence.transaction.exception.UnableToAcquireLockException;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
-import com.tangosol.net.BackingMapManagerContext;
+import com.tangosol.net.BackingMapContext;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.InvocableMap.EntryProcessor;
 import com.tangosol.util.processor.AbstractProcessor;
+
+import sample.coherence.data.*;
 
 public class FailoverProcessor extends AbstractProcessor implements
 		PortableObject, EntryProcessor {
@@ -91,9 +98,7 @@ public class FailoverProcessor extends AbstractProcessor implements
 						.getBackingMapEntry(
 								ctx.getKeyToInternalConverter().convert(
 										childKey));
-				childEntry.setValue(new StatusEvent(childKey.getMessageId(),
-						(String) childKey.getAssociatedKey(), 9, System
-								.currentTimeMillis() + 100000));
+				childEntry.setValue(new StatusEvent(childKey.getMessageId(),(String) childKey.getAssociatedKey(), 9, System.currentTimeMillis() + 100000, System.currentTimeMillis()));
 			}
 			try {
 				Thread.sleep(sleepTime);

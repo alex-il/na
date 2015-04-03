@@ -107,6 +107,16 @@
             <thread-count>10</thread-count>
             <task-timeout>365d</task-timeout>
 			<guardian-timeout>365d</guardian-timeout>
+            <member-listener>
+                <class-name>sample.coherence.failover.InvocationMemberListener</class-name>
+                <init-params>
+                    <init-param>
+                        <param-type>long</param-type>
+                        <param-value>1l</param-value>
+                    </init-param>
+                </init-params>
+               
+            </member-listener>
 			<autostart>true</autostart>
 		</invocation-scheme>
 	</caching-schemes>

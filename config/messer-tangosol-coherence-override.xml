@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coherence xmlns="http://xmlns.oracle.com/coherence/coherence-operational-config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-operational-config http://xmlns.oracle.com/coherence/coherence-operational-config/1.1/coherence-operational-config.xsd">
+    <!--coherence-version:3.7.1-->
+    
+    <cluster-config>
+        <member-identity>
+            <cluster-name>delay-poc</cluster-name>
+        </member-identity>
+        <unicast-listener>
+            <well-known-addresses>
+                <socket-address id="1">
+                    <address>127.0.0.1</address>
+                    <port>9876</port>
+                </socket-address>
+				<socket-address id="2">
+                    <address>127.0.0.1</address>
+                    <port>9877</port>
+                </socket-address>
+			
+            </well-known-addresses>
+            <address>127.0.0.1</address>
+            <port>9876</port>
+        </unicast-listener>
+    </cluster-config>
+	
+    <logging-config>
+        <destination>stdout</destination>
+        <severity-level>9</severity-level>
+    </logging-config>
+   
+    <license-config>
+        <edition-name>EE</edition-name>
+        <license-mode>prod</license-mode>
+    </license-config>
+   
+    
+ 
+</coherence>

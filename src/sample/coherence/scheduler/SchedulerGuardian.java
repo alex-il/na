@@ -1,5 +1,7 @@
 package sample.coherence.scheduler;
 
+import java.util.Collection;
+
 import com.tangosol.net.Guardable;
 import com.tangosol.net.Guardian.GuardContext;
 
