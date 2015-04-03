@@ -1,6 +1,5 @@
 package sample.coherence.scheduler.test;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -18,7 +17,7 @@ import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.NamedCache;
 
 public class Test {
-
+	static final long SECOND = 1000l;
 	/**
 	 * @param args
 	 */
@@ -33,42 +32,44 @@ public class Test {
 
 		}
 
-
 		NamedCache cache = CacheFactory.getCache(StatusEvent.EVENTS_CACHE);
 
 		StatusEventListener listener = new StatusEventListener(sleeptime);
-		//cache.addMapListener(listener) ;
-
+		// cache.addMapListener(listener) ;
+		// === populate ===
 		if (test.equals("p")) {
-			if (args.length > 1 && args[1] != null) 
+			if (args.length > 1 && args[1] != null) {
 				maxentries = Integer.valueOf(args[1]);
-			populateCache(cache, maxentries);
-		} else if (test.equals("s")){
-			if (args.length > 1 && args[1] != null) 
-				sleeptime = Long.valueOf(args[1]);
-			Scanner scanner = new Scanner(System.in);
-			System.out.println("Starting Scheduler with " + sleeptime  + "ms delay. Press to continue ...");
-			scanner.nextLine();
-			
-			runScheduler(cache, sleeptime);
-			try{
-			Thread.sleep(1000000l);
-			} catch (Exception ex)
-			{
 			}
-			
-		} else if (test.equals("f")){
-			if (args.length > 1 && args[1] != null) 
+			populateCache(cache, maxentries);
+		}
+		// === sleep ===
+		else if (test.equals("s")) {
+			if (args.length > 1 && args[1] != null) {
+				sleeptime = Long.valueOf(args[1]);
+			}
+			Scanner scanner = new Scanner(System.in);
+			System.out.println("Starting Scheduler with " + sleeptime + "ms delay. Press to continue ...");
+			scanner.nextLine();
+
+			runScheduler(cache, sleeptime);
+			try {
+				Thread.sleep(100*SECOND);
+			} catch (Exception ex) {
+			}
+
+		} else if (test.equals("f")) {
+			if (args.length > 1 && args[1] != null)
 				maxentries = Integer.valueOf(args[1]);
-			if (args.length > 2 && args[1] != null) 
+			if (args.length > 2 && args[1] != null)
 				sleeptime = Long.valueOf(args[2]);
 			listener.setSleepTime(sleeptime);
 			runFailOver(cache, maxentries, sleeptime);
-		} else { 
+		} else {
 			System.out.println("usage is messer-test.cmd action maxEntries Sleep time");
 			System.out.println("action: p-polulate, s-scheduler, f-fialover");
 			System.out.println("Example: 'messer-test.cmds 100' will start the scheduler with a 100 millisecond sleeptime");
-		}		
+		}
 
 	}
 
@@ -100,110 +101,93 @@ public class Test {
 	}
 
 	
-	private static void populateCache(NamedCache cache, int maxentries){
-		
-		
-		cache.clear(); 
-		
+
+	private static void populateCache(NamedCache cache, int maxentries) {
+		cache.clear();
 		System.out.println("Populating cache with " + maxentries + " entries - started ..");
-		
-		
 		Map<StatusEventKey, StatusEvent> map = new HashMap<StatusEventKey, StatusEvent>();
-		long now = System.currentTimeMillis(); 
-		long delay=1000l;
-		long loopTtl=now+delay;
-		long eventTTLFactor=50l;
-		for (int i = 0; i < maxentries; i++) {							
-			
+		long now = System.currentTimeMillis();
+		long delay = SECOND;
+		long loopTtl = now + delay;
+		long eventTTLFactor = 50l;
+		for (int i = 0; i < maxentries; i++) {
 			StatusEvent e = new StatusEvent(String.valueOf(i), null, 1, loopTtl, now);
-			
 			StatusEventKey key = new StatusEventKey(e);
-			
 			map.put(key, e);
-			System.out.println("INSERTED ENTRY with Key:"+key.toString() + " now:" + now +  " TTL:" + e.getTtl() + " delay:" + (e.getTtl()-now));
-			
-			loopTtl= loopTtl + eventTTLFactor;
-			
+			System.out.println("MAIN.populateCache  ENTRY with Key:" + key.toString() 
+					+ " delay:"   + (e.getTtl() - now)/1000.
+					+ " now:" + now + " TTL:" + e.getTtl() 
+			    );
+
+			loopTtl = loopTtl + eventTTLFactor;
 		}
 		cache.putAll(map);
-		
-		System.out.println("Populating Cache with " + maxentries + " entries - completed" );
+		System.out.println("Cache populated with " + maxentries + " entries - completed");
 	}
-	
-	
+
 	private static void runScheduler(NamedCache cache, long sleeptime) {
 
-
 		try {
-			populateCache(cache, 1000);
-			SafeInvocationService iService = (SafeInvocationService) CacheFactory
-					.getService("InvocationService");
-			Constructor<?> serviceConstructor = SchedulerService.class
-					.getConstructor(Long.class);
-
-			MyObserver observer = new MyObserver();
-			
+			populateCache(cache, 10);
+			SafeInvocationService iService = (SafeInvocationService) CacheFactory.getService("InvocationService");
+//			Constructor<?> serviceConstructor = SchedulerService.class.getConstructor(Long.class);
 			Long delay = sleeptime;
-			iService.execute(
-					(SchedulerService) serviceConstructor.newInstance(delay),
-					null, observer);
+//			iService.execute((SchedulerService) serviceConstructor.newInstance(delay), null, observer);
+			iService.execute(new SchedulerService(delay), null, new MyObserver());
 		} catch (Exception ex) {
-
+			ex.printStackTrace();
 		}
 	}
 
-	
-	private static void runFailOver(NamedCache cache, int maxentries,
-			long sleeptime) {
+	private static void runFailOver(NamedCache cache, int maxentries, long sleeptime) {
 		try {
-			System.out.println("Statung failover test with xaentries= " + maxentries + " sleeptime=" + sleeptime); 
+			System.out.println("Statung failover test with xaentries= " + maxentries + " sleeptime=" + sleeptime);
 			long startTest = System.currentTimeMillis();
-			
+
 			int k = 1;
 			String s = UUID.randomUUID().toString();
-			
-			while (maxentries > 0){
+
+			while (maxentries > 0) {
 				long start = System.currentTimeMillis();
 				for (int j = 0; j < 100; j++) {
-					StatusEvent e2 = new StatusEvent(s + "-" + k, null, 1,
-							(System.currentTimeMillis() + 10000),System.currentTimeMillis() );
+					StatusEvent e2 = new StatusEvent(s + "-" + k, null, 1, (System.currentTimeMillis() + 10000),
+					    System.currentTimeMillis());
 					cache.put(new StatusEventKey(e2), e2);
 					k++;
-					// print stattistics
-					if (k % 1000 == 0){
+					// print statistics
+					if (k % 1000 == 0) {
 						long duration = (System.currentTimeMillis() - startTest) / 1000;
-						double rate = k/duration;
+						double rate = k / duration;
 						System.out.println("Created=" + k + " rate=" + rate);
 					}
 					maxentries--;
 				}
-				
-				try{
+
+				try {
 					long duration = System.currentTimeMillis() - start;
-					if (duration < 1000)
+					if (duration < 1000){
 						Thread.sleep(1000 - duration);
-				} catch (Exception ex){
-					
+					}
+				} catch (Exception ex) {
+					System.err.println("---runFailOver");
+					ex.printStackTrace();
 				}
-				
 
 			}
-
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	private static void runFailOver1(NamedCache cache, int maxentries,
-			long sleeptime) {
+
+	private static void runFailOver1(NamedCache cache, int maxentries, long sleeptime) {
 		try {
 			for (int j = 0; j < maxentries; j++) {
-				StatusEvent e2 = new StatusEvent("Failover-" + j, null, 1,
-						(System.currentTimeMillis() + 100000),System.currentTimeMillis() );
+				StatusEvent e2 = new StatusEvent("Failover-" + j, null, 1, (System.currentTimeMillis() + 100000),
+				    System.currentTimeMillis());
 				cache.put(new StatusEventKey(e2), e2);
 
-				FailoverProcessor agent = new FailoverProcessor(e2.getMessageStatus(),  sleeptime);
+				FailoverProcessor agent = new FailoverProcessor(e2.getMessageStatus(), sleeptime);
 				cache.invoke(new StatusEventKey(e2), agent);
 			}
 
@@ -211,7 +195,5 @@ public class Test {
 			ex.printStackTrace();
 		}
 	}
-	
-	
-	
+
 }

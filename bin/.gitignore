@@ -1,1 +1,3 @@
-/sample/
+/coherence-cache-config.xml
+/pof-config.xml
+/tangosol-coherence-override.xml

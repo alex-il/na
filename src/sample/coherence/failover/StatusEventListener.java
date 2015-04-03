@@ -59,11 +59,9 @@ public class StatusEventListener implements MapListener {
 			public void run() {
 				try {
 					String memberName = ManagementFactory.getRuntimeMXBean().getName();
-					Logger.log(Logger.DEBUG
-							, memberName + " : EventListener: Thread:" + Thread.currentThread().getId() + ":"
-					    + MapEvent.getDescription(oper) + " MsgId=" + event.toString()
-					    );
-					
+					Logger.log(Logger.DEBUG, memberName + " : EventListener: Thread:" + Thread.currentThread().getId() + ":"
+					    + MapEvent.getDescription(oper) + " MsgId=" + event.toString());
+
 					NamedCache cache = CacheFactory.getCache(StatusEvent.EVENTS_CACHE);
 					cache.invoke(key, new FailoverProcessor(event.getMessageStatus(), sleep));
 
