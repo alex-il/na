@@ -1,11 +1,9 @@
 package sample.coherence.failover;
 
-import java.lang.reflect.Constructor;
-
 import sample.coherence.scheduler.SchedulerService;
-import sample.coherence.scheduler.test.Test.MyObserver;
 
 import com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.InvocationService;
+import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.MemberEvent;
 import com.tangosol.net.MemberListener;
 
@@ -28,40 +26,56 @@ public class InvocationMemberListener implements MemberListener {
 
 	@Override
 	public void memberJoined(MemberEvent arg0) {
-		System.out.println("+++memberJoined");
-
-		System.out.println("starting to add service for delay  !!!");
-
 		Long sleeptime = getSleeptime();
-
+		System.out.println("~~~memberJoined. Starting delay="+sleeptime);
 		runScheduler(sleeptime, arg0);
-		System.out.println("finished to add service for delay  !!!");
+		System.out.println("~~~memberJoined. Ended delay="+sleeptime);
 	}
 
 	@Override
 	public void memberLeaving(MemberEvent arg0) {
-		System.out.println("--->>>memberLeaving");
+		System.out.println("~~~memberLeaving");
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void memberLeft(MemberEvent arg0) {
-		System.out.println("-------memberLeft");
-
+		System.out.println("~~~memberLeft");
 	}
 
-	private static void runScheduler(long sleeptime, MemberEvent arg0) {
+	private static void runScheduler(long sleeptime, MemberEvent memberEvent) {
 		try {
-			InvocationService iService = (InvocationService) arg0.getService();
-			Constructor<?> serviceConstructor = SchedulerService.class.getConstructor(Long.class);
-			MyObserver observer = new MyObserver();
+			InvocationService iService = (InvocationService) memberEvent.getService();
+			OsbObserver observer = new OsbObserver();
 			Long delay = sleeptime;
-			iService.execute((SchedulerService) serviceConstructor.newInstance(delay), null, observer);
+			iService.execute(new SchedulerService(delay), null, observer);
 		} catch (Exception ex) {
+			System.err.println("~~~ -------runScheduler.exception----- ");
 			ex.printStackTrace();
-			System.err.println("------------------------\n\n\n\n");
 		}
 	}
 
+	public static class OsbObserver implements InvocationObserver {
+		@Override
+		public void invocationCompleted() {
+			System.out.println("...invocationCompleted");
+		}
+
+		@Override
+		public void memberCompleted(com.tangosol.net.Member member, Object arg1) {
+			System.out.println("...Member Completed");
+		}
+
+		@Override
+		public void memberFailed(com.tangosol.net.Member member, Throwable arg1) {
+			System.out.println("...Member Failed");
+		}
+
+		@Override
+		public void memberLeft(com.tangosol.net.Member member) {
+			System.out.println("...Member Left");
+		}
+	}
+	
 }

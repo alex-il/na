@@ -15,7 +15,8 @@ public class StatusEventKey implements PortableObject, KeyAssociation {
 	public StatusEventKey() {
 	}
 
-	public StatusEventKey(StatusEvent event) {
+	public StatusEventKey(StatusEventValue event) {
+
 		this.messageId = event.getMessageId();
 		this.parentId = event.getParentMessageId();
 		if (parentId == null) {
@@ -26,6 +27,7 @@ public class StatusEventKey implements PortableObject, KeyAssociation {
 	public StatusEventKey(String parentMessageId, String messageId) {
 		this.messageId = messageId;
 		this.parentId = parentMessageId;
+
 	}
 
 	@Override

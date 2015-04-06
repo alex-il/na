@@ -4,10 +4,9 @@ import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import sample.coherence.data.StatusEvent;
 import sample.coherence.data.StatusEventKey;
+import sample.coherence.data.StatusEventValue;
 
-import com.oracle.coherence.common.logging.Logger;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.MapEvent;
@@ -34,7 +33,6 @@ public class StatusEventListener implements MapListener {
 	@Override
 	public void entryDeleted(MapEvent mapEvent) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -50,7 +48,7 @@ public class StatusEventListener implements MapListener {
 	}
 
 	private void processEvent(MapEvent mapEvent) {
-		final StatusEvent event = (StatusEvent) mapEvent.getNewValue();
+		final StatusEventValue event = (StatusEventValue) mapEvent.getNewValue();
 		final StatusEventKey key = (StatusEventKey) mapEvent.getKey();
 		final int oper = mapEvent.getId();
 		final long sleep = this.sleepTime;
@@ -59,14 +57,17 @@ public class StatusEventListener implements MapListener {
 			public void run() {
 				try {
 					String memberName = ManagementFactory.getRuntimeMXBean().getName();
-					Logger.log(Logger.DEBUG, memberName + " : EventListener: Thread:" + Thread.currentThread().getId() + ":"
-					    + MapEvent.getDescription(oper) + " MsgId=" + event.toString());
-
-					NamedCache cache = CacheFactory.getCache(StatusEvent.EVENTS_CACHE);
+					System.out.println(
+							"processEvent. Sleep: " + sleep
+							+ " MsgId=" + event.toString() 
+							+ " Thread:" + Thread.currentThread().getId() 
+					    + MapEvent.getDescription(oper) 
+					    + ", member"+memberName);
+					
+					NamedCache cache = CacheFactory.getCache(StatusEventValue.EVENTS_CACHE);
 					cache.invoke(key, new FailoverProcessor(event.getMessageStatus(), sleep));
-
 				} catch (Throwable e) {
-					System.out.println("Error:" + e.getMessage());
+					System.out.println("processEvent.exception:" + e.getMessage());
 					e.printStackTrace();
 				}
 

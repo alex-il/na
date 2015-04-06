@@ -4,57 +4,53 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Date;
 
+import sample.coherence.data.StatusEventValue;
+
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 import com.tangosol.util.InvocableMap.EntryProcessor;
 import com.tangosol.util.processor.AbstractProcessor;
 
-import sample.coherence.data.*;
-
 public class SchedulerProcessor extends AbstractProcessor implements PortableObject, EntryProcessor {
 
 	/**
 	 * 
 	 */
-  private static final long serialVersionUID = -4062992297006021962L;
+	private static final long serialVersionUID = -4062992297006021962L;
 
 	@Override
 	public Object process(com.tangosol.util.InvocableMap.Entry entry) {
-
-		StatusEvent event = (StatusEvent) entry.getValue();
-
+		StatusEventValue event = (StatusEventValue) entry.getValue();
 		Long ttl = event.getTtl();
-
 		String memberName = ManagementFactory.getRuntimeMXBean().getName();
 		long now = System.currentTimeMillis();
 		long status = event.getMessageStatus();
 		long beforeDelay = event.getBeforeDealy();
-		
-		System.out.println("now:"+new Date(now));
-		System.out.println("beforeDelay:"+new Date(beforeDelay));
-		System.out.println("ttl:"+new Date(ttl));
-		System.out.println(" process(). Entry:" + entry.getKey() + " Status=" + status + " TTL=" + ttl + " delayed:"
-		    + (now - beforeDelay) / 1000. + " Now=" + now + " beforeDelay=" + beforeDelay + " Member=" + memberName);
-		/*
-		 * try { Thread.sleep(1000l); } catch (InterruptedException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); }
-		 */
-		entry.remove(false);
-		// System.out.println("Member=" + memberName + " Removed Entry:" +
-		// entry.getKey() + " Status=" + status + " TTL=" + ttl + " Now=" + now +
-		// " delayed:" + (now - ttl));
 
+		System.out.println("==========================="); 
+		System.out.println("Now: " + new Date(now)); 
+		System.out.println("TTL: " + new Date(ttl)); 
+		System.out.println("beforeDelay: "+ beforeDelay); 
+		System.out.println("Removing Entry:" + entry.getKey() 
+				+ " Status=" + status 
+				+ " TTL=" + ttl 
+				+ " beforeDelay=" + beforeDelay 
+				+ " Now=" + now 
+				+ " delayed:"	+ (now - beforeDelay) 
+				+ " Member=" + memberName);
+		System.out.println("==========================="); 
+		entry.remove(false);
 		return null;
 	}
 
 	@Override
 	public void readExternal(PofReader pofreader) throws IOException {
-//		System.out.println("===>>> readExternal()");
+		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void writeExternal(PofWriter pofwriter) throws IOException {
-//		System.out.println("<<<=== writeExternal()");
+		// TODO Auto-generated method stub
 	}
 }

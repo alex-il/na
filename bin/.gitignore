@@ -1,3 +1,7 @@
 /coherence-cache-config.xml
 /pof-config.xml
 /tangosol-coherence-override.xml
+/sample/
+/messer-coherence-cache-config.xml
+/OsbObserve.class
+/MyObserver.class
