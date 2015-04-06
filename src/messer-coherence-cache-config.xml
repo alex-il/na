@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<!-- | Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights 
+	reserved. | | Oracle is a registered trademarks of Oracle Corporation and/or 
+	its affiliates. | | This software is the confidential and proprietary information 
+	of | Oracle Corporation. You shall not disclose such confidential and | proprietary 
+	information and shall use it only in accordance with the | terms of the license 
+	agreement you entered into with Oracle. | | This notice may not be removed 
+	or altered. -->
+
+<cache-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.oracle.com/coherence/coherence-cache-config"
+	xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-cache-config coherence-cache-config.xsd">
+	<defaults>
+		<serializer>pof</serializer>
+	</defaults>
+
+	<caching-scheme-mapping>
+		<cache-mapping>
+			<cache-name>dist-*</cache-name>
+			<scheme-name>dist-default</scheme-name>
+		</cache-mapping>
+
+		<cache-mapping>
+			<cache-name>local-*</cache-name>
+			<scheme-name>example-local</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>near-*</cache-name>
+			<scheme-name>near-default</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>repl-*</cache-name>
+			<scheme-name>repl-default</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>tx-*</cache-name>
+			<scheme-name>example-transactional</scheme-name>
+		</cache-mapping>
+
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<distributed-scheme>
+			<scheme-name>dist-default</scheme-name>
+
+			<!-- <partition-listener> <class-name>com.oracle.coherence.mapreduce.listeners.MemberPartitionsListener</class-name> 
+				</partition-listener> -->
+			<backing-map-scheme>
+				<local-scheme>
+<!-- 					<listener>
+						<class-scheme>
+							<class-name>sample.coherence.failover.MyBackingMapListener</class-name>
+							<init-params>
+								<init-param>
+									<param-type>com.tangosol.net.BackingMapManagerContext
+									</param-type>
+									<param-value>{manager-context}</param-value>
+								</init-param>
+								<init-param>
+									<param-type>java.lang.Long</param-type>
+									<param-value>10</param-value>
+								</init-param>
+							</init-params>
+						</class-scheme>
+					</listener> -->
+				</local-scheme>
+			</backing-map-scheme>
+			<autostart>true</autostart>
+		</distributed-scheme>
+		<local-scheme>
+			<scheme-name>example-local</scheme-name>
+		</local-scheme>
+
+		<near-scheme>
+			<scheme-name>near-default</scheme-name>
+			<front-scheme>
+				<local-scheme>
+					<scheme-ref>example-local</scheme-ref>
+				</local-scheme>
+			</front-scheme>
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>dist-default</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+		</near-scheme>
+		<replicated-scheme>
+			<scheme-name>repl-default</scheme-name>
+			<backing-map-scheme>
+				<local-scheme />
+			</backing-map-scheme>
+
+			<autostart>true</autostart>
+		</replicated-scheme>
+		<transactional-scheme>
+			<scheme-name>example-transactional</scheme-name>
+			<service-name>TransactionalCache</service-name>
+			<thread-count>10</thread-count>
+			<request-timeout>100000ms</request-timeout>
+			<autostart>true</autostart>
+		</transactional-scheme>
+		<invocation-scheme>
+			<scheme-name>entriesInPartitions-service</scheme-name>
+			<service-name>InvocationService</service-name>
+            <thread-count>10</thread-count>
+            <task-timeout>365d</task-timeout>
+			<guardian-timeout>365d</guardian-timeout>
+            <member-listener>
+                <class-name>sample.coherence.failover.InvocationMemberListener</class-name>
+                <init-params>
+                    <init-param>
+                        <param-type>long</param-type>
+                        <param-value>1l</param-value>
+                    </init-param>
+                </init-params>
+               
+            </member-listener>
+			<autostart>true</autostart>
+		</invocation-scheme>
+	</caching-schemes>
+</cache-config>
