@@ -18,7 +18,7 @@
 		<!-- include all application POF user types -->
 		<user-type>
 			<type-id>1002</type-id>
-			<class-name>sample.coherence.data.StatusEvent
+			<class-name>sample.coherence.data.StatusEventValue
 			</class-name>
 		</user-type>
 		<user-type>
