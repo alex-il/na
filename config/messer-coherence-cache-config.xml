@@ -45,33 +45,26 @@
 		<distributed-scheme>
 			<scheme-name>dist-default</scheme-name>
 
-<!-- 
-			<partition-listener> 
-				<class-name>
-					com.oracle.coherence.mapreduce.listeners.MemberPartitionsListener
-				</class-name> 
-			</partition-listener> 
--->
+			<!-- <partition-listener> <class-name>com.oracle.coherence.mapreduce.listeners.MemberPartitionsListener</class-name> 
+				</partition-listener> -->
 			<backing-map-scheme>
 				<local-scheme>
-<!-- 					
-				<listener>
-					<class-scheme>
-						<class-name>sample.coherence.failover.MyBackingMapListener</class-name>
-						<init-params>
-							<init-param>
-								<param-type>com.tangosol.net.BackingMapManagerContext
-								</param-type>
-								<param-value>{manager-context}</param-value>
-							</init-param>
-							<init-param>
-								<param-type>java.lang.Long</param-type>
-								<param-value>10</param-value>
-							</init-param>
-						</init-params>
-					</class-scheme>
-				</listener> 
--->
+<!-- 					<listener>
+						<class-scheme>
+							<class-name>sample.coherence.failover.MyBackingMapListener</class-name>
+							<init-params>
+								<init-param>
+									<param-type>com.tangosol.net.BackingMapManagerContext
+									</param-type>
+									<param-value>{manager-context}</param-value>
+								</init-param>
+								<init-param>
+									<param-type>java.lang.Long</param-type>
+									<param-value>10</param-value>
+								</init-param>
+							</init-params>
+						</class-scheme>
+					</listener> -->
 				</local-scheme>
 			</backing-map-scheme>
 			<autostart>true</autostart>

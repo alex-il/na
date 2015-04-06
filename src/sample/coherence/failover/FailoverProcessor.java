@@ -2,51 +2,43 @@ package sample.coherence.failover;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.Map;
+
+import sample.coherence.data.StatusEventKey;
+import sample.coherence.data.StatusEventValue;
 
 import com.oracle.coherence.common.logging.Logger;
-import com.tangosol.net.BackingMapManagerContext;
-import com.tangosol.coherence.transaction.Connection;
-import com.tangosol.coherence.transaction.ConnectionFactory;
-import com.tangosol.coherence.transaction.DefaultConnectionFactory;
-import com.tangosol.coherence.transaction.OptimisticNamedCache;
-import com.tangosol.coherence.transaction.exception.RollbackException;
-import com.tangosol.coherence.transaction.exception.UnableToAcquireLockException;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
-import com.tangosol.net.BackingMapContext;
+import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.InvocableMap.EntryProcessor;
 import com.tangosol.util.processor.AbstractProcessor;
 
-import sample.coherence.data.*;
+public class FailoverProcessor extends AbstractProcessor implements PortableObject, EntryProcessor {
 
-public class FailoverProcessor extends AbstractProcessor implements
-		PortableObject, EntryProcessor {
-
+	private static final long serialVersionUID = 4537821691099167930L;
 	private Long sleepTime = 5000l;
 	private String memberName;
 	private Long status;
-	
+
 	public FailoverProcessor() {
 
 	}
 
 	public FailoverProcessor(Long status, Long sleep) {
-		sleepTime = sleep;
+		this.sleepTime = sleep;
 		this.status = status;
 	}
 
 	@Override
 	public Object process(com.tangosol.util.InvocableMap.Entry entry) {
-
-
 		memberName = ManagementFactory.getRuntimeMXBean().getName();
 		StatusEventValue event = (StatusEventValue) entry.getValue();
-		if (event == null || event.getMessageStatus() != status)
-		{
-//			Logger.log(LOG_DEBUG, "FailoverProcessor: Entry " + entry.getKey() + " has changed status - exiting processor : Expected=" + status + " Received=" + event.getMessageStatus());
+		if (event == null || event.getMessageStatus() != status) {
+			// Logger.log(LOG_DEBUG, "FailoverProcessor: Entry " + entry.getKey() +
+			// " has changed status - exiting processor : Expected=" + status +
+			// " Received=" + event.getMessageStatus());
 			return null;
 		}
 
@@ -73,14 +65,13 @@ public class FailoverProcessor extends AbstractProcessor implements
 
 		StatusEventValue e = (StatusEventValue) entry.getValue();
 		StatusEventKey key = (StatusEventKey) entry.getKey();
-		if (e == null){
-			Logger.log(LOG_INFO, "FailOver Procesor: entry is null");
+		if (e == null) {
+			System.out.println("FailOver Procesor: entry is null");
 			return null;
 		}
 		long status = e.getMessageStatus();
 		Logger.log(LOG_DEBUG, "Member:" + memberName + " : Thread:" + Thread.currentThread().getId() + " : entry:"
-				+ ((StatusEventKey) entry.getKey()).getMessageId()
-				+ " Status=" + status + " : started");
+		    + ((StatusEventKey) entry.getKey()).getMessageId() + " Status=" + status + " : started");
 
 		BinaryEntry bentry = (BinaryEntry) entry;
 		BackingMapManagerContext ctx = bentry.getContext();
@@ -88,17 +79,13 @@ public class FailoverProcessor extends AbstractProcessor implements
 		if (status == 2) {
 			// BackingMapManagerContext ctx = (BackingMapManagerContext)
 			// bentry.getBackingMapContext();
-			StatusEventKey childKey = new StatusEventKey(key.getMessageId(),
-					key.getMessageId() + "-child");
+			StatusEventKey childKey = new StatusEventKey(key.getMessageId(), key.getMessageId() + "-child");
 
 			for (int n = 1; n <= 10; n++) {
-				BinaryEntry childEntry = (BinaryEntry) bentry
-						.getContext()
-						.getBackingMapContext(StatusEventValue.EVENTS_CACHE)
-						.getBackingMapEntry(
-								ctx.getKeyToInternalConverter().convert(
-										childKey));
-				childEntry.setValue(new StatusEventValue(childKey.getMessageId(),(String) childKey.getAssociatedKey(), 9, System.currentTimeMillis() + 100000, System.currentTimeMillis()));
+				BinaryEntry childEntry = (BinaryEntry) bentry.getContext().getBackingMapContext(StatusEventValue.EVENTS_CACHE)
+				    .getBackingMapEntry(ctx.getKeyToInternalConverter().convert(childKey));
+				childEntry.setValue(new StatusEventValue(childKey.getMessageId(), (String) childKey.getAssociatedKey(), 9, System
+				    .currentTimeMillis() + 100000, System.currentTimeMillis()));
 			}
 			try {
 				Thread.sleep(sleepTime);
@@ -111,18 +98,15 @@ public class FailoverProcessor extends AbstractProcessor implements
 				e.setMessageStatus(status + 1);
 				entry.setValue(e);
 			} else {
-				
-				Logger.log(LOG_DEBUG, "Failover Processor: Removing Entry;" + e.toString());
+				System.out.println("Failover Processor: Removing Entry;" + e.toString());
 				entry.remove(false);
 			}
 		}
 
-		Logger.log(LOG_DEBUG, "Member:" + memberName + " : entry:"
-				+ ((StatusEventKey) entry.getKey()).getMessageId()
-				 + " Status=" + status + " : Completed");
+		System.out.println("Member:" + memberName + " : entry:" + ((StatusEventKey) entry.getKey()).getMessageId()
+		    + " Status=" + status + " : Completed");
 
 		return true;
-
 	}
 
 }

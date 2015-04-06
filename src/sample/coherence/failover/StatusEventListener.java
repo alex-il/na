@@ -14,11 +14,11 @@ import com.tangosol.util.MapListener;
 
 public class StatusEventListener implements MapListener {
 
-	private ExecutorService executer;
+	private ExecutorService executor;
 	private long sleepTime = 1;
 
 	public StatusEventListener(long sleep) {
-		executer = Executors.newFixedThreadPool(20);
+		executor = Executors.newFixedThreadPool(20);
 		sleepTime = sleep;
 	}
 
@@ -32,19 +32,20 @@ public class StatusEventListener implements MapListener {
 
 	@Override
 	public void entryDeleted(MapEvent mapEvent) {
-		// TODO Auto-generated method stub
+		System.out.print( "  entryDeleted  ");
+		processEvent(mapEvent);
 	}
 
 	@Override
 	public void entryInserted(MapEvent mapEvent) {
+		System.out.print( "  entryInserted  ");
 		processEvent(mapEvent);
-
 	}
 
 	@Override
 	public void entryUpdated(MapEvent mapEvent) {
+		System.out.print( "  entryUpdated  ");
 		processEvent(mapEvent);
-
 	}
 
 	private void processEvent(MapEvent mapEvent) {
@@ -53,16 +54,16 @@ public class StatusEventListener implements MapListener {
 		final int oper = mapEvent.getId();
 		final long sleep = this.sleepTime;
 
-		executer.execute(new Runnable() {
+		executor.execute(new Runnable() {
 			public void run() {
 				try {
 					String memberName = ManagementFactory.getRuntimeMXBean().getName();
 					System.out.println(
-							"processEvent. Sleep: " + sleep
+							" ====>>> StatusEventListener.processEvent(). Sleep: " + sleep
 							+ " MsgId=" + event.toString() 
 							+ " Thread:" + Thread.currentThread().getId() 
-					    + MapEvent.getDescription(oper) 
-					    + ", member"+memberName);
+					    + "oper" + MapEvent.getDescription(oper) 
+					    + ", member" + memberName);
 					
 					NamedCache cache = CacheFactory.getCache(StatusEventValue.EVENTS_CACHE);
 					cache.invoke(key, new FailoverProcessor(event.getMessageStatus(), sleep));

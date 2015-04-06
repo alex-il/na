@@ -31,15 +31,22 @@ public class SchedulerProcessor extends AbstractProcessor implements PortableObj
 		System.out.println("==========================="); 
 		System.out.println("Now: " + new Date(now)); 
 		System.out.println("TTL: " + new Date(ttl)); 
-		System.out.println("beforeDelay: "+ beforeDelay); 
+		System.out.println("beforeDelay: "+ new Date(beforeDelay) ); 
 		System.out.println("Removing Entry:" + entry.getKey() 
 				+ " Status=" + status 
+				+ " delayed:"	+ (now - beforeDelay)/1000.	+ "(sec), "
 				+ " TTL=" + ttl 
 				+ " beforeDelay=" + beforeDelay 
 				+ " Now=" + now 
-				+ " delayed:"	+ (now - beforeDelay) 
-				+ " Member=" + memberName);
+				+ "Member=" + memberName);
 		System.out.println("==========================="); 
+		try {
+			System.out.println("\n\n\n\n processing alert ........... press kill now!!!!  "+ status +"\n\n\n\n\n");
+	    Thread.sleep(60000l);
+    } catch (InterruptedException e) {
+    	System.err.println("==========================="); 
+	    e.printStackTrace();
+    }
 		entry.remove(false);
 		return null;
 	}

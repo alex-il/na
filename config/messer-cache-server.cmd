@@ -31,7 +31,7 @@ set java_opts=%java_opts% -Dtangosol.coherence.cacheconfig=%coherence_home%\bin\
 
 
 @echo %java_exec% -server -showversion %java_opts% -cp "c:\temp\messer.jar;%coherence_home%\lib\coherence.jar;d:\j-scala\MesserLeumi\lib\coherence-common-2.3.0.39174.jar" com.tangosol.net.DefaultCacheServer %1
-@pause
+
 %java_exec% -server -showversion %java_opts% -cp "c:\temp\messer.jar;%coherence_home%\lib\coherence.jar;d:\j-scala\MesserLeumi\lib\coherence-common-2.3.0.39174.jar" com.tangosol.net.DefaultCacheServer %1
 
 goto exit

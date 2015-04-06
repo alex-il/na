@@ -1,43 +1,30 @@
 package sample.coherence.failover;
 
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import sample.coherence.data.StatusEventValue;
 import sample.coherence.data.StatusEventKey;
+import sample.coherence.data.StatusEventValue;
 
 import com.oracle.coherence.common.backingmaplisteners.AbstractMultiplexingBackingMapListener;
 import com.oracle.coherence.common.backingmaplisteners.Cause;
-import com.oracle.coherence.common.logging.Logger;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.util.AbstractMapListener;
-import com.tangosol.util.Filter;
 import com.tangosol.util.MapEvent;
-import com.tangosol.util.ValueExtractor;
-import com.tangosol.util.extractor.AbstractExtractor;
-import com.tangosol.util.extractor.ReflectionExtractor;
-import com.tangosol.util.filter.EqualsFilter;
-import com.tangosol.util.filter.KeyAssociatedFilter;
 
-public class MyBackingMapListener extends
-	AbstractMultiplexingBackingMapListener {
-	
+public class MyBackingMapListener extends AbstractMultiplexingBackingMapListener {
 
 	private BackingMapManagerContext backingMapManagerContext;
-
-	private NamedCache cache = null;
-	private ExecutorService executer; 
+	private ExecutorService executer;
 	private long sleepTime = 1;
 
 	public MyBackingMapListener(BackingMapManagerContext context, Long sleep) {
 		super(context);
 		this.backingMapManagerContext = context;
-		executer  = Executors.newFixedThreadPool(20);
+		executer = Executors.newFixedThreadPool(20);
 		sleepTime = sleep;
-		Logger.log(LOG_ALWAYS, "BackingMapListener Inititated: Sleeptime=" + sleepTime);
+		System.out.println(" BackingMapListener CTOR: Sleeptime=" + sleepTime);
 	}
 
 	@Override
@@ -47,66 +34,48 @@ public class MyBackingMapListener extends
 
 	@Override
 	public void entryDeleted(MapEvent evt) {
-		// TODO Auto-generated method stub
-		super.entryDeleted(evt);
+//		super.entryDeleted(evt);
+		processevent(evt);
 	}
 
 	@Override
 	public void entryInserted(MapEvent evt) {
-		// TODO Auto-generated method stub
-		processevent(evt);
 		// super.entryInserted(evt);
+		processevent(evt);
 	}
 
 	@Override
 	public void entryUpdated(MapEvent evt) {
-		// TODO Auto-generated method stub
-
-		processevent(evt);
 		// super.entryUpdated(evt);
+		processevent(evt);
 	}
 
 	private void processevent(MapEvent mapEvent) {
-
-		final StatusEventValue event = (StatusEventValue) getNewValue(mapEvent);
-
-		final StatusEventKey key = (StatusEventKey) getKey(mapEvent);
-
-		final int oper = mapEvent.getId();
-		
+		final StatusEventValue event = getEventValue(mapEvent);
+		final StatusEventKey key = getEventKey(mapEvent);
 		final long sleep = this.sleepTime;
-		
+		final int oper = mapEvent.getId();
 		executer.execute(new Runnable() {
-			
 			public void run() {
 				try {
-//					System.out.println("BackingMap: Thread:" + Thread.currentThread().getId() + ":" +  MapEvent.getDescription(oper) + " MsgId=" + event.toString() );
-					String clusterMemberName = ManagementFactory
-							.getRuntimeMXBean().getName();
-					NamedCache cache = CacheFactory
-							.getCache(StatusEventValue.EVENTS_CACHE);
+					System.out.println(" ===== MyBackingMapListener. ===  oper:" + oper);
+					NamedCache cache = CacheFactory.getCache(StatusEventValue.EVENTS_CACHE);
 					cache.invoke(key, new FailoverProcessor(event.getMessageStatus(), sleep));
-
-
 				} catch (Throwable e) {
-					System.out.println("Error:" + e.getMessage());
-
+					System.err.println("Error:" + e.getMessage());
 					e.printStackTrace();
 				}
-
 			}
 		});
 
 	}
 
-	public Object getKey(MapEvent mapEvent) {
-		return getBackingMapManagerContext().getKeyFromInternalConverter()
-				.convert(mapEvent.getKey());
+	public StatusEventKey getEventKey(MapEvent mapEvent) {
+		return (StatusEventKey) getBackingMapManagerContext().getKeyFromInternalConverter().convert(mapEvent.getKey());
 	}
 
-	public Object getNewValue(MapEvent mapEvent) {
-		return getBackingMapManagerContext().getValueFromInternalConverter()
-				.convert(mapEvent.getNewValue());
+	public StatusEventValue getEventValue(MapEvent mapEvent) {
+		return (StatusEventValue) getBackingMapManagerContext().getValueFromInternalConverter().convert(mapEvent.getNewValue());
 	}
 
 	public BackingMapManagerContext getBackingMapManagerContext() {

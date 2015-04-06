@@ -27,9 +27,9 @@ public class InvocationMemberListener implements MemberListener {
 	@Override
 	public void memberJoined(MemberEvent arg0) {
 		Long sleeptime = getSleeptime();
-		System.out.println("~~~memberJoined. Starting delay="+sleeptime);
+		System.out.println("	~~~	memberJoined. Starting delay="+sleeptime);
 		runScheduler(sleeptime, arg0);
-		System.out.println("~~~memberJoined. Ended delay="+sleeptime);
+		System.out.println("	~~~	memberJoined. Ended delay="+sleeptime);
 	}
 
 	@Override
@@ -48,8 +48,7 @@ public class InvocationMemberListener implements MemberListener {
 		try {
 			InvocationService iService = (InvocationService) memberEvent.getService();
 			OsbObserver observer = new OsbObserver();
-			Long delay = sleeptime;
-			iService.execute(new SchedulerService(delay), null, observer);
+			iService.execute(new SchedulerService(sleeptime), null, observer);
 		} catch (Exception ex) {
 			System.err.println("~~~ -------runScheduler.exception----- ");
 			ex.printStackTrace();
@@ -59,22 +58,22 @@ public class InvocationMemberListener implements MemberListener {
 	public static class OsbObserver implements InvocationObserver {
 		@Override
 		public void invocationCompleted() {
-			System.out.println("...invocationCompleted");
+			System.out.println("... OsbObserver invocationCompleted");
 		}
 
 		@Override
 		public void memberCompleted(com.tangosol.net.Member member, Object arg1) {
-			System.out.println("...Member Completed");
+			System.out.println("...OsbObserver Completed");
 		}
 
 		@Override
 		public void memberFailed(com.tangosol.net.Member member, Throwable arg1) {
-			System.out.println("...Member Failed");
+			System.out.println("...OsbObserver Failed");
 		}
 
 		@Override
 		public void memberLeft(com.tangosol.net.Member member) {
-			System.out.println("...Member Left");
+			System.out.println("...OsbObserver Left");
 		}
 	}
 	
