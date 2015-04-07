@@ -41,8 +41,10 @@ public class SchedulerProcessor extends AbstractProcessor implements PortableObj
 				+ "Member=" + memberName);
 		System.out.println("==========================="); 
 		try {
-			System.out.println("\n\n\n\n processing alert ........... press kill now!!!!  "+ status +"\n\n\n\n\n");
-	    Thread.sleep(60000l);
+			System.out.println("\n\n\n\n START processing alert ........... press kill now!!!! MessageId "+ event.getMessageId()
+					+ ", parent ID: " + event.getParentMessageId()+ "\n\n\n\n\n");
+	    Thread.sleep(10000l);
+	    System.out.println(" END processing alert ......... \n\n\n\n\n");
     } catch (InterruptedException e) {
     	System.err.println("==========================="); 
 	    e.printStackTrace();

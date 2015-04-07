@@ -8,35 +8,32 @@ import com.tangosol.net.MemberEvent;
 import com.tangosol.net.MemberListener;
 
 public class InvocationMemberListener implements MemberListener {
+	private static Long sleep = 100l;
 
-	private Long sleeptime = 100l;
-
-	public Long getSleeptime() {
-		return sleeptime;
+	public Long getSleep() {
+		return sleep;
 	}
 
-	public void setSleeptime(Long sleeptime) {
-		this.sleeptime = sleeptime;
+	public void setSleep(Long sleeptime) {
+		this.sleep = sleeptime;
 	}
 
-	public InvocationMemberListener(Long sleep) {
+	public InvocationMemberListener(Long sleeptime) {
 		super();
-		this.sleeptime = sleep;
+		this.sleep = sleeptime;
 	}
 
 	@Override
 	public void memberJoined(MemberEvent arg0) {
-		Long sleeptime = getSleeptime();
-		System.out.println("	~~~	memberJoined. Starting delay="+sleeptime);
-		runScheduler(sleeptime, arg0);
-		System.out.println("	~~~	memberJoined. Ended delay="+sleeptime);
+		System.out.println("	~~~	memberJoined. Starting delay=" + sleep);
+		invoke(arg0);
+		System.out.println("	~~~	memberJoined. Ended delay=" + sleep);
 	}
 
 	@Override
 	public void memberLeaving(MemberEvent arg0) {
 		System.out.println("~~~memberLeaving");
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -44,11 +41,14 @@ public class InvocationMemberListener implements MemberListener {
 		System.out.println("~~~memberLeft");
 	}
 
-	private static void runScheduler(long sleeptime, MemberEvent memberEvent) {
+	private static void invoke( MemberEvent memberEvent) {
 		try {
+			System.out.println("~~~ InvocationMemberListener . runScheduler sleeptime:" + sleep);
 			InvocationService iService = (InvocationService) memberEvent.getService();
-			OsbObserver observer = new OsbObserver();
-			iService.execute(new SchedulerService(sleeptime), null, observer);
+			System.out.println("\n\n\n\n~~~ before SchedulerService . member id:" + memberEvent.getMember().getId());
+			// iService.execute(new SchedulerService(sleeptime), null, new OsbObserver());
+			iService.execute(new SchedulerService(sleep), null, null);
+			System.out.println("\n\n\n\n~~~ after SchedulerService . member id:" + memberEvent.getMember().getId());
 		} catch (Exception ex) {
 			System.err.println("~~~ -------runScheduler.exception----- ");
 			ex.printStackTrace();
@@ -76,5 +76,5 @@ public class InvocationMemberListener implements MemberListener {
 			System.out.println("...OsbObserver Left");
 		}
 	}
-	
+
 }

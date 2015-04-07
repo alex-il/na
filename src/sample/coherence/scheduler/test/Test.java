@@ -65,15 +65,18 @@ public class Test {
 		long now = System.currentTimeMillis();
 		long delay = SECOND;
 		long loopTtl = now + delay;
-		long eventTTLFactor = 15 * SECOND;
+		long eventTTLFactor = 10
+				* SECOND;
 		for (int i = 0; i < maxentries; i++) {
 			StatusEventValue e = new StatusEventValue(String.valueOf(i), null, 1, loopTtl, now);
 			StatusEventKey key = new StatusEventKey(e);
 			map.put(key, e);
-			System.out.println("INSERT, Key:" + key.toString() + " now:" + now + " TTL:" + e.getTtl() + " delay:"
+			System.out.println("add to map , Key:" + key.toString() + " now:" + now + " TTL:" + e.getTtl() + " delay:"
 			    + (e.getTtl() - now)/1000. +"(sec)");
-			loopTtl = loopTtl + eventTTLFactor;
+//			loopTtl = loopTtl + eventTTLFactor;
+			loopTtl = delay + eventTTLFactor;
 		}
+		System.out.println(" == Before Populating Cache #:" + maxentries);
 		cache.putAll(map);
 		System.out.println("<<== End Populating Cache #:" + maxentries);
 	}

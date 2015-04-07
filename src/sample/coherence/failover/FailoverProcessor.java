@@ -63,13 +63,13 @@ public class FailoverProcessor extends AbstractProcessor implements PortableObje
 
 	private Object processPartitionTx(com.tangosol.util.InvocableMap.Entry entry) {
 
-		StatusEventValue e = (StatusEventValue) entry.getValue();
+		StatusEventValue value = (StatusEventValue) entry.getValue();
 		StatusEventKey key = (StatusEventKey) entry.getKey();
-		if (e == null) {
+		if (value == null) {
 			System.out.println("FailOver Procesor: entry is null");
 			return null;
 		}
-		long status = e.getMessageStatus();
+		long status = value.getMessageStatus();
 		Logger.log(LOG_DEBUG, "Member:" + memberName + " : Thread:" + Thread.currentThread().getId() + " : entry:"
 		    + ((StatusEventKey) entry.getKey()).getMessageId() + " Status=" + status + " : started");
 
@@ -94,11 +94,11 @@ public class FailoverProcessor extends AbstractProcessor implements PortableObje
 			}
 		} else {
 
-			if (e.getMessageStatus() < 5) {
-				e.setMessageStatus(status + 1);
-				entry.setValue(e);
+			if (value.getMessageStatus() < 5) {
+				value.setMessageStatus(status + 1);
+				entry.setValue(value);
 			} else {
-				System.out.println("Failover Processor: Removing Entry;" + e.toString());
+				System.out.println("Failover Processor: Removing Entry;" + value.toString());
 				entry.remove(false);
 			}
 		}
